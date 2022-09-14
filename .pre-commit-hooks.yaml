@@ -1,0 +1,7 @@
+- id: scalafmt
+  name: scalafmt
+  entry: sbt
+  args: [scalafmt]
+  language: system
+  pass_filenames: false
+  description: Format scala code
