@@ -1,0 +1,18 @@
+[build-system]
+requires = [
+    "setuptools >= 65.3.0"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pre-commit-sbt"
+version = "0.0.1beta"
+description = "A set of pre-commit hooks which integrate well with SBT (for scala)."
+readme = "README.md"
+
+[project.optional-dependencies]
+dev = [
+    "pre-commit==2.20.0",
+    "tox==3.26.0",
+    "pytest==7.1.3"
+]

@@ -8,7 +8,7 @@ $(VENV_DEV):
 	$(PYTHON_BIN) -m venv $(VENV_DEV); \
 		. $(VENV_DEV)/bin/activate; \
 		pip install --upgrade pip; \
-		pip install -r requirements-dev.txt;
+		pip install -e .[dev];
 
 .git/hooks/pre-commit: $(VENV_DEV)
 	. $(VENV_DEV)/bin/activate; \
@@ -20,4 +20,6 @@ setup-dev: $(VENV_DEV) .git/hooks/pre-commit
 .PHONY: clean
 clean:
 	rm -rf \
-		$(VENV_DEV)
+		$(VENV_DEV) \
+		build/ \
+		$(shell find *.egg-info -type d)
