@@ -17,6 +17,11 @@ $(VENV_DEV):
 .PHONY: setup-dev
 setup-dev: $(VENV_DEV) .git/hooks/pre-commit
 
+.PHONY: test
+test: setup-dev
+	. $(VENV_DEV)/bin/activate; \
+	tox
+
 .PHONY: clean
 clean:
 	rm -rf \
@@ -25,4 +30,5 @@ clean:
 		$(shell find *.egg-info -type d) \
 		$(shell find __pycache__ -type d) \
 		$(shell find .pytest_cache -type d) \
-		.mypy_cache
+		.mypy_cache \
+		.tox
