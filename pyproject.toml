@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "setuptools >= 65.3.0"
+    "setuptools >= 65.4.0"
 ]
 build-backend = "setuptools.build_meta"
 
@@ -19,6 +19,9 @@ dev = [
     "tox==3.26.0",
 ]
 
+[project.scripts]
+run-sbt-command = "pre_commit_sbt.run_sbt_command:main"
+
 [tool.black]
 line-length = 120
 
@@ -29,3 +32,6 @@ strict = true
 disable = ["C0114", "C0116"]
 good-names = ["f"]
 max-line-length = 120
+
+[tool.setuptools.packages.find]
+where = ["src"]

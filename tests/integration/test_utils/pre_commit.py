@@ -13,4 +13,5 @@ def pre_commit_try_repo(repo: Path, *, hook_repo: Path, hook_id: str) -> Complet
         cwd=repo,
         check=False,
         shell=True,
+        capture_output=True,
     )

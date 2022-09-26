@@ -27,8 +27,8 @@ clean:
 	rm -rf \
 		$(VENV_DEV) \
 		build/ \
-		$(shell find *.egg-info -type d) \
+		$(shell find -iname '*.egg-info' -type d) \
 		$(shell find __pycache__ -type d) \
-		$(shell find .pytest_cache -type d) \
+		$(shell find -iname .pytest_cache -type d) \
 		.mypy_cache \
 		.tox
