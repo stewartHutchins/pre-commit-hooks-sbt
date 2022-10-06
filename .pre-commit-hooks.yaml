@@ -2,6 +2,6 @@
   name: scalafmt
   language: python
   entry: run-sbt-command
-  args: [scalafmt]
+  args: [--command, scalafmt]
   pass_filenames: false
   description: Format scala code

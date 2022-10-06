@@ -20,10 +20,10 @@ _SCALAFMT_VERSION = "3.5.9"
     "src_file",
     [
         "src/main/scala/Main.scala",
-        pytest.param(
-            "worksheet.sc",
-            marks=pytest.mark.xfail(reason="scalafmt plugin does not format worksheet files"),
-        ),
+        # pytest.param(
+        #     "worksheet.sc",
+        #     marks=pytest.mark.xfail(reason="scalafmt plugin does not format worksheet files"),
+        # ),
     ],
 )
 def test_scalafmt_hook_should_format_scala_code(sbt_project_dir: Path, src_file: str) -> None:
