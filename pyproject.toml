@@ -22,6 +22,8 @@ dev = [
 [project.scripts]
 run-sbt-command = "pre_commit_sbt.run_sbt_command:main"
 
+[tool]
+
 [tool.black]
 line-length = 120
 
@@ -32,3 +34,6 @@ strict = true
 disable = ["C0114", "C0116"]
 good-names = ["f"]
 max-line-length = 120
+
+[tool.setuptools.package-data]
+pre_commit_sbt = ["py.typed"]
