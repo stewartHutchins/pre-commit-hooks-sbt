@@ -8,10 +8,11 @@ def install_pre_commit(repo: Path) -> None:
 
 
 def pre_commit_try_repo(repo: Path, *, hook_repo: Path, hook_id: str) -> CompletedProcess[bytes]:
-    return subprocess.run(
+    proc = subprocess.run(
         f"pre-commit try-repo {hook_repo} {hook_id} --verbose --all-files",
         cwd=repo,
         check=False,
         shell=True,
         capture_output=True,
     )
+    return proc
