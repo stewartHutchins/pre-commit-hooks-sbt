@@ -1,0 +1,2 @@
+class FailedCommandError(ValueError):
+    pass

@@ -32,7 +32,7 @@ line-length = 120
 strict = true
 
 [tool.pylint]
-disable = ["C0114", "C0116"]
+disable = ["C0114", "C0115", "C0116"]
 good-names = ["f"]
 max-line-length = 120
 
