@@ -2,13 +2,13 @@ from pathlib import Path
 from subprocess import CompletedProcess
 
 import pytest
-from test_utils.file import read_file
-from test_utils.file import write_to_file
-from test_utils.git import git_add
-from test_utils.git import git_init
-from test_utils.pre_commit import install_pre_commit
-from test_utils.pre_commit import pre_commit_try_repo
-from test_utils.text import strip_margin
+from unit_test_utils.file import read_file
+from unit_test_utils.file import write_to_file
+from unit_test_utils.git import git_add
+from unit_test_utils.git import git_init
+from unit_test_utils.pre_commit import install_pre_commit
+from unit_test_utils.pre_commit import pre_commit_try_repo
+from unit_test_utils.text import strip_margin
 
 _PRE_COMMIT_CONFIG_FILE = ".pre-commit-config.yaml"
 _SCALAFMT_PLUGIN_VERSION = "2.4.6"
