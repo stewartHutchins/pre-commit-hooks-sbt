@@ -2,8 +2,9 @@ import asyncio
 from pathlib import Path
 
 import pytest
-from integration_test_utils.sbt import add_sleep_command_to_sbt
-from integration_test_utils.sbt import add_touch_command_to_sbt
+from testing_utils.sbt import add_sleep_command_to_sbt
+from testing_utils.sbt import add_touch_command_to_sbt
+
 from pre_commit_sbt.command_runners.shell_runner import run_via_commandline
 from pre_commit_sbt.err.error_msgs import COMMAND_FAILED
 from pre_commit_sbt.err.failed_command_error import FailedCommandError
