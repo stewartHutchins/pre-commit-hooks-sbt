@@ -1,6 +1,5 @@
 import subprocess
 from asyncio import StreamReader
-from asyncio import wait_for
 from asyncio.subprocess import create_subprocess_exec
 from pathlib import Path
 from typing import AsyncIterable
@@ -9,10 +8,10 @@ from pre_commit_sbt.err.error_msgs import COMMAND_FAILED
 from pre_commit_sbt.err.failed_command_error import FailedCommandError
 
 
-async def run_via_commandline(command: str, cwd: Path, *, timeout: int = 10) -> None:
+async def run_via_commandline(command: str, cwd: Path) -> None:
     proc = await create_subprocess_exec("sbt", command, cwd=cwd, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     assert proc.stdout is not None
-    is_successful = await wait_for(_is_command_successful(proc.stdout), timeout)
+    is_successful = await _is_command_successful(proc.stdout)
     _assert_successful(is_successful)
 
 
