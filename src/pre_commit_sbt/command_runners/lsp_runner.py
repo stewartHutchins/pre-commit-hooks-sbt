@@ -15,7 +15,7 @@ _MAX_ID = 10**6
 async def run_via_lsp(sbt_command: str, socket: SocketType) -> None:
     reader, writer = await open_unix_connection(sock=socket)
     task_id = random.randint(_MIN_ID, _MAX_ID)
-    json_rpc = command_rpc(task_id, ";".join(["reload", sbt_command]))
+    json_rpc = command_rpc(task_id, sbt_command)
     _send_to_server(writer, json_rpc)
     completion_msg = await read_until_complete_message(reader, task_id)
     exit_code: int = _exit_code(completion_msg)  # type: ignore
