@@ -5,7 +5,7 @@ from testing_utils.sbt import add_touch_command_to_sbt
 
 from pre_commit_sbt.command_runners.shell_runner import run_via_commandline
 from pre_commit_sbt.err.error_msgs import COMMAND_FAILED
-from pre_commit_sbt.err.failed_command_error import FailedCommandError
+from pre_commit_sbt.err.exceptions import FailedCommandError
 
 
 @pytest.mark.asyncio

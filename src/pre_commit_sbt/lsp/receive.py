@@ -6,7 +6,7 @@ from typing import AsyncIterable
 from typing import TypeAlias
 
 from pre_commit_sbt.err.error_msgs import COMMAND_FAILED
-from pre_commit_sbt.err.failed_command_error import FailedCommandError
+from pre_commit_sbt.err.exceptions import FailedCommandError
 
 JsonType: TypeAlias = dict[str, str | int | dict[str, object]]
 
