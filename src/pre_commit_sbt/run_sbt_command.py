@@ -7,12 +7,12 @@ from pathlib import Path
 from pre_commit_sbt.args.parse_args import arg_parser
 from pre_commit_sbt.args.parse_args import sbt_command
 from pre_commit_sbt.args.parse_args import timeout
+from pre_commit_sbt.command_runners.lsp.conn import connect_to_sbt_server
+from pre_commit_sbt.command_runners.lsp.port_file import connection_details
+from pre_commit_sbt.command_runners.lsp.port_file import port_path
+from pre_commit_sbt.command_runners.lsp.server import is_server_running
 from pre_commit_sbt.command_runners.lsp_runner import run_via_lsp
 from pre_commit_sbt.command_runners.shell_runner import run_via_commandline
-from pre_commit_sbt.lsp.conn import connect_to_sbt_server
-from pre_commit_sbt.lsp.port_file import connection_details
-from pre_commit_sbt.lsp.port_file import port_path
-from pre_commit_sbt.lsp.server import is_server_running
 
 
 async def main_async(args: list[str] | None = None, cwd: Path = Path(".")) -> int:

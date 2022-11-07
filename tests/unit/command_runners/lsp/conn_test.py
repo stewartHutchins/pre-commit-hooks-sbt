@@ -1,7 +1,7 @@
 import socket
 from pathlib import Path
 
-from pre_commit_sbt.lsp.conn import connect_to_sbt_server
+from pre_commit_sbt.command_runners.lsp.conn import connect_to_sbt_server
 
 
 def test_connect_to_sbt_server(tmp_path: Path) -> None:
