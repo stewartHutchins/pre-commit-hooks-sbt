@@ -5,7 +5,6 @@ import pytest
 from testing_utils.sbt import add_sleep_command_to_sbt
 from testing_utils.sbt import add_touch_command_to_sbt
 
-from pre_commit_sbt.err.error_msgs import COMMAND_FAILED
 from pre_commit_sbt.err.exceptions import FailedCommandError
 from pre_commit_sbt.run_sbt_command import main_async
 
@@ -41,7 +40,5 @@ async def test_main_async_invalid_command(sbt_project: Path) -> None:
     """main_async should fail if a command is invalid"""
 
     # act & assert
-    with pytest.raises(FailedCommandError) as ex:
+    with pytest.raises(FailedCommandError):
         await main_async(["--command", "non existent command"], sbt_project)
-
-    assert ex.value.args[0] == COMMAND_FAILED

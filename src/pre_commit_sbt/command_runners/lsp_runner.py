@@ -3,8 +3,9 @@ from asyncio import open_unix_connection
 from asyncio import StreamWriter
 from socket import SocketType
 
-from pre_commit_sbt.err.error_msgs import COMMAND_FAILED
-from pre_commit_sbt.err.exceptions import FailedCommandError
+from pre_commit_sbt.err.error_msgs import LSP_FAILURE_MSG
+from pre_commit_sbt.err.exceptions import LspRunnerError
+from pre_commit_sbt.lsp.error_codes import error_code_to_human_readable
 from pre_commit_sbt.lsp.receive import read_until_complete_message
 from pre_commit_sbt.lsp.rpc import command_rpc
 
@@ -20,7 +21,13 @@ async def run_via_lsp(sbt_command: str, socket: SocketType) -> None:
     completion_msg = await read_until_complete_message(reader, task_id)
     err_code: int = _err_code(completion_msg)  # type: ignore
     if err_code != 0:
-        raise FailedCommandError(COMMAND_FAILED)
+        raise LspRunnerError(
+            LSP_FAILURE_MSG.format(
+                short_reason=error_code_to_human_readable(err_code),
+                err_code=err_code,
+                err_msg=_error_message(completion_msg),  # type: ignore
+            )
+        )
 
 
 def _send_to_server(writer: StreamWriter, json_rpc: str) -> None:
@@ -32,3 +39,7 @@ def _err_code(completion_msg: dict[str, dict[str, int]]) -> int:
         return completion_msg["result"]["exitCode"]
     else:
         return completion_msg["error"]["code"]
+
+
+def _error_message(completion_msg: dict[str, dict[str, str]]) -> str:
+    return completion_msg["error"]["message"]
