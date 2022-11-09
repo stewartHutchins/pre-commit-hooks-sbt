@@ -4,8 +4,8 @@ from asyncio import StreamWriter
 from socket import SocketType
 
 from pre_commit_sbt.command_runners.lsp.error_codes import error_code_to_human_readable
-from pre_commit_sbt.command_runners.lsp.receive import read_until_complete_message
 from pre_commit_sbt.command_runners.lsp.request import create_exec_request
+from pre_commit_sbt.command_runners.lsp.response import read_until_complete_message
 from pre_commit_sbt.err.error_msgs import LSP_FAILURE_MSG
 from pre_commit_sbt.err.exceptions import LspRunnerError
 
