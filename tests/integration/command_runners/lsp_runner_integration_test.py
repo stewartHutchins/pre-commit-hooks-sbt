@@ -4,7 +4,7 @@ from socket import SocketType
 import pytest
 from testing_utils.sbt import add_touch_command_to_sbt
 
-from pre_commit_sbt.command_runners.lsp.error_codes import error_code_to_human_readable
+from pre_commit_sbt.command_runners.lsp.response import error_code_to_human_readable
 from pre_commit_sbt.command_runners.lsp_runner import run_via_lsp
 from pre_commit_sbt.err.exceptions import FailedCommandError
 

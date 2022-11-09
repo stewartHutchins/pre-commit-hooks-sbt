@@ -1,12 +1,6 @@
-from __future__ import annotations
-
 import json
 from asyncio import StreamReader
-from typing import AsyncIterable
 from typing import TypeAlias
-
-from pre_commit_sbt.err.error_msgs import COMMAND_FAILED
-from pre_commit_sbt.err.exceptions import FailedCommandError
 
 JsonType: TypeAlias = dict[str, str | int | dict[str, object]]
 
@@ -16,19 +10,7 @@ class _HeaderKeys:  # pylint: disable=too-few-public-methods
     CONTENT_LENGTH = "Content-Length"
 
 
-async def read_until_complete_message(reader: StreamReader, task_id: int) -> JsonType:
-    async for message in _message_iterator(reader):
-        if _is_response_message(message, task_id):
-            return message
-    raise FailedCommandError(COMMAND_FAILED)
-
-
-async def _message_iterator(reader: StreamReader) -> AsyncIterable[JsonType]:
-    while not reader.at_eof():
-        yield await _get_next_message(reader)
-
-
-async def _get_next_message(reader: StreamReader) -> JsonType:
+async def get_next_message(reader: StreamReader) -> JsonType:
     headers = _parse_headers(await _read_headers(reader))
     content_length: int = headers[_HeaderKeys.CONTENT_LENGTH]  # type: ignore
     body = _parse_body(await _read_body(content_length, reader))
@@ -68,5 +50,41 @@ def _parse_body(content: str) -> JsonType:
     return body
 
 
-def _is_response_message(message: JsonType, task_id: int) -> bool:
+def is_completion_message(message: JsonType, task_id: int) -> bool:
     return message.get("id") == task_id
+
+
+def error_message(completion_msg: JsonType) -> str:
+    return completion_msg["error"]["message"]  # type: ignore
+
+
+def return_code(completion_msg: JsonType) -> int:
+    if "result" in completion_msg:  # pylint: disable=no-else-return
+        return completion_msg["result"]["exitCode"]  # type: ignore
+    else:
+        return completion_msg["error"]["code"]  # type: ignore
+
+
+_EXIT_CODES: dict[int, str] = {
+    -32700: "ParseError - Invalid JSON.",
+    -32600: "InvalidRequest - JSON was valid, but did not conform to specification.",
+    -32601: "MethodNotFound - The method does not exist / is not available.",
+    -32602: "InvalidParams - Invalid method parameter(s).",
+    -32603: "InternalError - Internal JSON-RPC error.",
+    -32099: "serverErrorStart",
+    -32000: "serverErrorEnd",
+    -32001: "UnknownServerError",
+    -32002: "ServerNotInitialized - Request sent before the server was initialized.",
+    -32800: "RequestCancelled - The request was cancelled.",
+    -33000: "UnknownError - unspecified error, but this is probably a malformed or non-existent SBT command",
+}
+
+
+def error_code_to_human_readable(err_code: int) -> str:
+    """
+    Convert an error code to a more human-readable reason for the error, as defined by:
+    https://github.com/sbt/sbt/blob/1.8.x/protocol/src/main/scala/sbt/internal/langserver/ErrorCodes.scala
+    :param err_code: The error code
+    :return: A human-readable reason for the error.
+    """
+    return _EXIT_CODES.get(err_code, "Unknown error code, please raise an issue.")
