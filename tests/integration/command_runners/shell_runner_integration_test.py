@@ -4,8 +4,7 @@ import pytest
 from testing_utils.sbt import add_touch_command_to_sbt
 
 from pre_commit_sbt.command_runners.shell_runner import run_via_commandline
-from pre_commit_sbt.err.error_msgs import COMMAND_FAILED
-from pre_commit_sbt.err.exceptions import FailedCommandError
+from pre_commit_sbt.err.exceptions import ShellRunnerError
 
 
 @pytest.mark.asyncio
@@ -28,7 +27,9 @@ async def test_run_via_commandline_runs_invalid_command(sbt_project_without_serv
     """Running an invalid sbt command via the commandline should raise an error"""
 
     # act & assert
-    with pytest.raises(FailedCommandError) as actual:
+    with pytest.raises(ShellRunnerError) as actual:
         await run_via_commandline("non_existing_command", sbt_project_without_server)
 
-    assert actual.value.args[0] == COMMAND_FAILED
+    actual_msg = actual.value.args[0]
+    assert "Not a valid command: non_existing_command" in actual_msg
+    assert "Error Code: 1" in actual_msg

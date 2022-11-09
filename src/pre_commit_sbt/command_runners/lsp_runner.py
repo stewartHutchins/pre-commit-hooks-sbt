@@ -15,7 +15,7 @@ from pre_commit_sbt.command_runners.lsp.response import return_code
 from pre_commit_sbt.err.error_msgs import COMMAND_FAILED
 from pre_commit_sbt.err.error_msgs import LSP_FAILURE_MSG
 from pre_commit_sbt.err.exceptions import FailedCommandError
-from pre_commit_sbt.err.exceptions import LspRunnerError
+from pre_commit_sbt.err.exceptions import ShellRunnerError
 
 _MIN_ID = 1
 _MAX_ID = 10**6
@@ -28,7 +28,7 @@ async def run_via_lsp(sbt_command: str, socket: SocketType) -> None:
     writer.write(json_rpc.encode("UTF-8"))
     completion_msg = await _read_until_complete_message(reader, task_id)
     if (_return_code := return_code(completion_msg)) != 0:
-        raise LspRunnerError(
+        raise ShellRunnerError(
             LSP_FAILURE_MSG.format(
                 short_reason=error_code_to_human_readable(_return_code),
                 err_code=_return_code,

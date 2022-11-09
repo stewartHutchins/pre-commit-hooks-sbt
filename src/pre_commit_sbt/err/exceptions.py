@@ -4,3 +4,7 @@ class FailedCommandError(ValueError):
 
 class LspRunnerError(FailedCommandError):
     pass
+
+
+class ShellRunnerError(FailedCommandError):
+    pass
