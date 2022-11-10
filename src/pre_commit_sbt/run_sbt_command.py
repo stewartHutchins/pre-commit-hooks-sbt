@@ -1,10 +1,12 @@
 import asyncio
+import logging
 import sys
 from logging import info
 from logging import warning
 from pathlib import Path
 
 from pre_commit_sbt.args.parse_args import arg_parser
+from pre_commit_sbt.args.parse_args import log_level
 from pre_commit_sbt.args.parse_args import sbt_command
 from pre_commit_sbt.args.parse_args import timeout
 from pre_commit_sbt.command_runners.lsp.conn import connect_to_sbt_server
@@ -18,10 +20,15 @@ from pre_commit_sbt.command_runners.shell_runner import run_via_commandline
 async def main_async(args: list[str] | None = None, cwd: Path = Path(".")) -> int:
     parser = arg_parser()
     parsed_args = parser.parse_args(args)
-    command = sbt_command(parsed_args)
-    _timeout = timeout(parsed_args)
-    await asyncio.wait_for(_run_sbt_command(command, cwd), timeout=_timeout)
+
+    _set_up_logging(log_level(parsed_args))
+
+    await asyncio.wait_for(_run_sbt_command(sbt_command(parsed_args), cwd), timeout=timeout(parsed_args))
     return 0
+
+
+def _set_up_logging(level: str) -> None:
+    logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.getLevelName(level))
 
 
 async def _run_sbt_command(command: str, cwd: Path) -> None:

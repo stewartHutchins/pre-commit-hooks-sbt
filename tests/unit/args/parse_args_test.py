@@ -1,7 +1,9 @@
 import pytest
 
 from pre_commit_sbt.args.parse_args import arg_parser
+from pre_commit_sbt.args.parse_args import DEFAULT_LOG_LEVEL
 from pre_commit_sbt.args.parse_args import DEFAULT_TIMEOUT
+from pre_commit_sbt.args.parse_args import log_level
 from pre_commit_sbt.args.parse_args import sbt_command
 from pre_commit_sbt.args.parse_args import timeout
 
@@ -22,7 +24,7 @@ def test_sbt_command() -> None:
 
 
 def test_missing_sbt_command() -> None:
-    """parser should get the --command argument"""
+    """parser should raise an exeption if the --command argument is missing"""
     # arrange
     args: list[str] = []
 
@@ -48,7 +50,7 @@ def test_timeout() -> None:
 
 
 def test_timeout_default() -> None:
-    """parser should get the --command argument"""
+    """parser should get the default if the --timeout argument is missing"""
     # arrange
     args = ["--command", "ignore"]
 
@@ -59,3 +61,32 @@ def test_timeout_default() -> None:
 
     # assert
     assert actual == DEFAULT_TIMEOUT
+
+
+def test_log_level() -> None:
+    """parser should get the default if the --timeout argument is missing"""
+    # arrange
+    expected = "some log level"
+    args = ["--command", "ignore", "--log-level", expected]
+
+    # act
+    parser = arg_parser()
+    parsed_args = parser.parse_args(args)
+    actual = log_level(parsed_args)
+
+    # assert
+    assert actual == expected
+
+
+def test_log_level_default() -> None:
+    """parser should get the default if the --timeout argument is missing"""
+    # arrange
+    args = ["--command", "ignore"]
+
+    # act
+    parser = arg_parser()
+    parsed_args = parser.parse_args(args)
+    actual = log_level(parsed_args)
+
+    # assert
+    assert actual == DEFAULT_LOG_LEVEL
