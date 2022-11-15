@@ -3,6 +3,7 @@ import pytest
 from pre_commit_sbt.args.parse_args import arg_parser
 from pre_commit_sbt.args.parse_args import DEFAULT_LOG_LEVEL
 from pre_commit_sbt.args.parse_args import DEFAULT_TIMEOUT
+from pre_commit_sbt.args.parse_args import files
 from pre_commit_sbt.args.parse_args import log_level
 from pre_commit_sbt.args.parse_args import sbt_command
 from pre_commit_sbt.args.parse_args import timeout
@@ -90,3 +91,18 @@ def test_log_level_default() -> None:
 
     # assert
     assert actual == DEFAULT_LOG_LEVEL
+
+
+@pytest.mark.parametrize("expected", [["file1", "file2", "file3"], []])
+def test_files(expected: list[str]) -> None:
+    """parser should get the files passed into the tool"""
+    # arrange
+    args = ["--command", "ignore"] + expected
+
+    # act
+    parser = arg_parser()
+    parsed_args = parser.parse_args(args)
+    actual = files(parsed_args)
+
+    # assert
+    assert expected == actual

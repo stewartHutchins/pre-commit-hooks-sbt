@@ -18,6 +18,7 @@ def arg_parser() -> ArgumentParser:
     parser.add_argument(
         "--log-level", help="The logging threshold level.", required=False, type=str, default=DEFAULT_LOG_LEVEL
     )
+    parser.add_argument("files", nargs="*")
     return parser
 
 
@@ -49,3 +50,13 @@ def log_level(parsed_args: Namespace) -> str:
     """
     level: str = parsed_args.log_level
     return level
+
+
+def files(parsed_args: Namespace) -> list[str]:
+    """
+    Get the files passed into the tool by the pre-commit framework
+    :param parsed_args: The args passed to the program
+    :return: The files which have been staged for commit
+    """
+    files_: list[str] = parsed_args.files
+    return files_
