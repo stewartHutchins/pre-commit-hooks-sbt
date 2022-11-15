@@ -23,9 +23,12 @@ command via the commandline.
 
 ### Available Hooks
 
-- scalafmt (see: [Configuring the scalafmt hook](#configuring-the-scalafmt-hook))
+- scalafmt (see: [Configuring the scalafmt hook](#configuring-the-scalafmt-hook)). Formats code in the current working
+  tree.
 
 #### Using the scalafmt hook
+
+This will only format files in your current working tree (i.e. the files you're currently working on).
 
 1) Add the scalafmt plugin to your sbt
    configuration ([scalafmt installation](https://scalameta.org/scalafmt/docs/installation.html#sbt)), and configure the
@@ -40,12 +43,5 @@ repos:
       - id: scalafmt
 ```
 
-3) (optionally) Add the following to your `build.sbt`:
-
-```sbt
-ThisBuild / scalafmtFilter := "diff-dirty"
-```
-
-This will only format files in your working tree (i.e. the files you're currently working on). If you don't include
-this, you may find that all the files in your project get formatted, leading to a confusing working tree or messy git
-history.
+NOTE: The hook will have a side effect of setting: `ThisBuild / scalafmtFilter` as `"diff-dirty"`. (This changes the
+default behaviour of scalafmt).

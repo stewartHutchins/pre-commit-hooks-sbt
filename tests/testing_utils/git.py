@@ -10,9 +10,9 @@ def git_add(repo: Path, file: Path) -> None:
     subprocess.run(f"git add {file}", cwd=repo, check=True, shell=True)
 
 
-def git_commit(repo: Path, msg: str) -> None:
+def git_commit(repo: Path, msg: str, additional_flags: str = "") -> None:
     subprocess.run(
-        f'git -c user.name="username" -c user.email="user@email.com" commit -m "{msg}"',
+        f'git -c user.name="username" -c user.email="user@email.com" commit -m "{msg}" {additional_flags}',
         cwd=repo,
         check=True,
         shell=True,

@@ -3,6 +3,7 @@ import subprocess
 from pathlib import Path
 
 from pytest_bdd import given
+from pytest_bdd import parsers
 from pytest_bdd import scenario
 from pytest_bdd import then
 from pytest_bdd import when
@@ -20,7 +21,7 @@ object Main {
 }
 """
 
-_EXPECTED_FORMATTED_CODE = """\
+_FORMATTED_CODE = """\
 object Main {
   def main(args: Array[String]): Unit = {
     println("Hello, World!")
@@ -34,35 +35,45 @@ def test_scalafmt(sbt_project: Path) -> None:  # pylint: disable=unused-argument
     pass
 
 
+@scenario("scalafmt.feature", "only code in the working tree is formatted")
+def test_scalafmt_working_tree(sbt_project: Path) -> None:  # pylint: disable=unused-argument
+    pass
+
+
 @given("an sbt project with scalafmt configured")
 def create_sbt_project(sbt_project: Path) -> None:
-    _create_plugins_file(
-        sbt_project,
-        content=f"""
-addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "{get_test_config()["scalafmt.plugun.version"]}")
-""",
-    )
-    _create_scalafmt_config_file(
-        sbt_project,
-        content=f"""
-runner.dialect = {get_test_config()["runner.dialect"]}
-version = {get_test_config()["scalafmt.version"]}
-""",
+    plugins_file = sbt_project.joinpath("project/plugins.sbt")
+    plugins_file.parent.mkdir(parents=True, exist_ok=True)
+    plugins_file.open("w").writelines(
+        f'addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "{_get_test_config()["scalafmt.plugun.version"]}")'
     )
 
+    sbt_project.joinpath(".scalafmt.conf").open("w").write(
+        f"""
+runner.dialect = {_get_test_config()["runner.dialect"]}
+version = {_get_test_config()["scalafmt.version"]}
+"""
+    )
     git_init(sbt_project)
     git_add(sbt_project, sbt_project.joinpath("project/plugins.sbt"))
     git_commit(sbt_project, "Add sbt project with scalafmt set up.")
 
 
-@given("there is an unformatted scala file in src/")
-def create_src_file(sbt_project: Path) -> None:
-    sbt_project.joinpath("src/main/scala").mkdir(parents=True)
-    sbt_project.joinpath("src/main/scala/Main.scala").open("w").write(_UNFORMATTED_CODE)
+@given(parsers.cfparse("there is an unformatted scala file {file_name:Path}", extra_types={"Path": Path}))
+def create_unformatted_scala_file(sbt_project: Path, file_name: Path) -> None:
+    file = sbt_project.joinpath(file_name)
+    file.parent.mkdir(parents=True, exist_ok=True)
+    file.open("w").write(_UNFORMATTED_CODE)
+
+
+@given(parsers.cfparse("the file {file_name:Path} is in the commit history", extra_types={"Path": Path}))
+def commit_to_history(sbt_project: Path, file_name: Path) -> None:
+    git_add(sbt_project, file_name)
+    git_commit(sbt_project, f"Add {file_name}", "--no-verify")
 
 
 @when("I run pre-commit")
-def run_pre_commit(sbt_project: str) -> None:
+def run_pre_commit(sbt_project: Path) -> None:
     subprocess.run(
         f"pre-commit try-repo {Path('.').absolute()} scalafmt --verbose --all-files",
         cwd=sbt_project,
@@ -71,25 +82,19 @@ def run_pre_commit(sbt_project: str) -> None:
     )
 
 
-@then("the code should be formatted")
-def assert_src_code_is_formatted(sbt_project: Path) -> None:
-    actual_code = sbt_project.joinpath("src/main/scala/Main.scala").open("r").read()
-    assert actual_code == _EXPECTED_FORMATTED_CODE
+@then(parsers.cfparse("the code in {file_name:Path} should be formatted", extra_types={"Path": Path}))
+def assert_code_is_formatted(sbt_project: Path, file_name: Path) -> None:
+    actual_content = sbt_project.joinpath(file_name).open("r", encoding="UTF-8").read()
+    assert actual_content == _FORMATTED_CODE
 
 
-def _create_plugins_file(root: Path, content: str) -> None:
-    root.joinpath("project/plugins.sbt").open("w").writelines(content)
+@then(parsers.cfparse("the code in the code in {file_name:Path} should not be formatted", extra_types={"Path": Path}))
+def assert_code_not_formatted(sbt_project: Path, file_name: Path) -> None:
+    actual_content = sbt_project.joinpath(file_name).open("r", encoding="UTF-8").read()
+    assert actual_content == _UNFORMATTED_CODE
 
 
-def _create_build_file(root: Path, content: str) -> None:
-    root.joinpath("build.sbt").open("w").write(content)
-
-
-def _create_scalafmt_config_file(root: Path, content: str) -> None:
-    root.joinpath(".scalafmt.conf").open("w").write(content)
-
-
-def get_test_config() -> dict[str, str]:
+def _get_test_config() -> dict[str, str]:
     file = Path("tests/behaviour/features/test_config.json").open("r", encoding="UTF-8")
     config: dict[str, str] = json.load(file)
     return config
