@@ -6,6 +6,7 @@ from logging import warning
 from pathlib import Path
 
 from pre_commit_sbt.args.parse_args import arg_parser
+from pre_commit_sbt.args.parse_args import files
 from pre_commit_sbt.args.parse_args import log_level
 from pre_commit_sbt.args.parse_args import sbt_command
 from pre_commit_sbt.args.parse_args import timeout
@@ -23,8 +24,17 @@ async def main_async(args: list[str] | None = None, cwd: Path = Path(".")) -> in
 
     _set_up_logging(log_level(parsed_args))
 
-    await asyncio.wait_for(_run_sbt_command(sbt_command(parsed_args), cwd), timeout=timeout(parsed_args))
+    command: str = _create_command(sbt_command(parsed_args), files(parsed_args))
+    await asyncio.wait_for(_run_sbt_command(command, cwd), timeout=timeout(parsed_args))
     return 0
+
+
+def _create_command(base_command: str, files_: list[str]) -> str:
+    return f"""{base_command} {" ".join(_quote(file) for file in files_)}"""
+
+
+def _quote(string: str) -> str:
+    return f'"{string}"'
 
 
 def _set_up_logging(level: str) -> None:
@@ -32,13 +42,14 @@ def _set_up_logging(level: str) -> None:
 
 
 async def _run_sbt_command(command: str, cwd: Path) -> None:
+    info(f'Running command: "{command}"')
     if is_server_running(cwd):
         with (open(port_path(cwd), encoding="UTF-8") as fp, connect_to_sbt_server(connection_details(fp)) as conn):
             info("Running command via LSP...")
             await run_via_lsp(command, conn)
     else:
         info("Running command via commandline...")
-        warning("Running commands via the commandline can be slow. Start an SBT server to avoid unnecessary overhead")
+        warning("Running commands via the commandline can be slow. Start an SBT server to avoid unnecessary overhead.")
         await run_via_commandline(command, cwd)
     info("Successfully ran hook")
 

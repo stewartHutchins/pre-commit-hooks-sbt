@@ -42,6 +42,3 @@ repos:
     hooks:
       - id: scalafmt
 ```
-
-NOTE: The hook will have a side effect of setting: `ThisBuild / scalafmtFilter` as `"diff-dirty"`. (This changes the
-default behaviour of scalafmt).

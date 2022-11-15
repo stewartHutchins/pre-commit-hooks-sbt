@@ -14,14 +14,15 @@ async def test_main_async(sbt_project: Path) -> None:
     """main_async should run a command"""
     # arrange
     add_touch_command_to_sbt(sbt_project, "touch")
-    file_to_create = "sample_file.txt"
+    files_to_create = ["sample1.txt", "sample2.txt", "sample 3.txt"]
 
     # act
-    await main_async(["--command", f"touch {file_to_create}"], sbt_project)
+    await main_async(["--command", "touch"] + files_to_create, sbt_project)
 
     # assert
-    expected_file = sbt_project.joinpath(file_to_create)
-    assert expected_file.exists()
+    for file in files_to_create:
+        expected_file = sbt_project.joinpath(file)
+        assert expected_file.exists()
 
 
 @pytest.mark.asyncio

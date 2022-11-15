@@ -35,7 +35,7 @@ def test_scalafmt(sbt_project: Path) -> None:  # pylint: disable=unused-argument
     pass
 
 
-@scenario("scalafmt.feature", "only code in the working tree is formatted")
+@scenario("scalafmt.feature", "only staged code is formatted")
 def test_scalafmt_working_tree(sbt_project: Path) -> None:  # pylint: disable=unused-argument
     pass
 
@@ -44,18 +44,20 @@ def test_scalafmt_working_tree(sbt_project: Path) -> None:  # pylint: disable=un
 def create_sbt_project(sbt_project: Path) -> None:
     plugins_file = sbt_project.joinpath("project/plugins.sbt")
     plugins_file.parent.mkdir(parents=True, exist_ok=True)
-    plugins_file.open("w").writelines(
+    plugins_file.write_text(
         f'addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "{_get_test_config()["scalafmt.plugun.version"]}")'
     )
-
-    sbt_project.joinpath(".scalafmt.conf").open("w").write(
+    scalafmt_conf = sbt_project.joinpath(".scalafmt.conf")
+    scalafmt_conf.write_text(
         f"""
 runner.dialect = {_get_test_config()["runner.dialect"]}
 version = {_get_test_config()["scalafmt.version"]}
 """
     )
+
     git_init(sbt_project)
-    git_add(sbt_project, sbt_project.joinpath("project/plugins.sbt"))
+    git_add(sbt_project, plugins_file)
+    git_add(sbt_project, scalafmt_conf)
     git_commit(sbt_project, "Add sbt project with scalafmt set up.")
 
 
@@ -64,6 +66,11 @@ def create_unformatted_scala_file(sbt_project: Path, file_name: Path) -> None:
     file = sbt_project.joinpath(file_name)
     file.parent.mkdir(parents=True, exist_ok=True)
     file.open("w").write(_UNFORMATTED_CODE)
+
+
+@given(parsers.cfparse("I git add {file_name:Path}", extra_types={"Path": Path}))
+def git_add_file(sbt_project: Path, file_name: Path) -> None:
+    git_add(sbt_project, file_name)
 
 
 @given(parsers.cfparse("the file {file_name:Path} is in the commit history", extra_types={"Path": Path}))
@@ -75,7 +82,7 @@ def commit_to_history(sbt_project: Path, file_name: Path) -> None:
 @when("I run pre-commit")
 def run_pre_commit(sbt_project: Path) -> None:
     subprocess.run(
-        f"pre-commit try-repo {Path('.').absolute()} scalafmt --verbose --all-files",
+        f"pre-commit try-repo {Path('.').absolute()} scalafmt --verbose",
         cwd=sbt_project,
         check=False,
         shell=True,
