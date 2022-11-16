@@ -13,7 +13,7 @@ from testing_utils.git import git_init
 
 _PRE_COMMIT_CONFIG_FILE = ".pre-commit-config.yaml"
 
-_UNFORMATTED_CODE = """\
+_UNFORMATTED_SCALA_CODE = """\
 object Main {
   def main(args: Array[String]): Unit = {
     println     ("Hello, World!")
@@ -21,7 +21,7 @@ object Main {
 }
 """
 
-_FORMATTED_CODE = """\
+_FORMATTED_SCALA_CODE = """\
 object Main {
   def main(args: Array[String]): Unit = {
     println("Hello, World!")
@@ -29,9 +29,24 @@ object Main {
 }
 """
 
+_UNFORMATTED_SBT_CODE = """\
+lazy val root = (project in file("."))
+  .settings(                    )
+"""
+
+_FORMATTED_SBT_CODE = """\
+lazy val root = (project in file("."))
+  .settings()
+"""
+
 
 @scenario("scalafmt.feature", "scala code is formatted")
-def test_scalafmt(sbt_project: Path) -> None:  # pylint: disable=unused-argument
+def test_scalafmt_scala_code(sbt_project: Path) -> None:  # pylint: disable=unused-argument
+    pass
+
+
+@scenario("scalafmt.feature", "sbt code is formatted")
+def test_scalafmt_sbt_code(sbt_project: Path) -> None:  # pylint: disable=unused-argument
     pass
 
 
@@ -54,18 +69,22 @@ runner.dialect = {_get_test_config()["runner.dialect"]}
 version = {_get_test_config()["scalafmt.version"]}
 """
     )
-
     git_init(sbt_project)
     git_add(sbt_project, plugins_file)
     git_add(sbt_project, scalafmt_conf)
     git_commit(sbt_project, "Add sbt project with scalafmt set up.")
 
 
-@given(parsers.cfparse("there is an unformatted scala file {file_name:Path}", extra_types={"Path": Path}))
-def create_unformatted_scala_file(sbt_project: Path, file_name: Path) -> None:
+@given(parsers.cfparse("there is unformatted code in {file_name:Path}", extra_types={"Path": Path}))
+def create_unformatted_file(sbt_project: Path, file_name: Path) -> None:
     file = sbt_project.joinpath(file_name)
     file.parent.mkdir(parents=True, exist_ok=True)
-    file.open("w").write(_UNFORMATTED_CODE)
+    if str(file_name).endswith("scala"):
+        file.write_text(_UNFORMATTED_SCALA_CODE)
+    elif str(file_name).endswith("sbt"):
+        file.write_text(_UNFORMATTED_SBT_CODE)
+    else:
+        raise ValueError("Was not scala or sbt files.")
 
 
 @given(parsers.cfparse("I git add {file_name:Path}", extra_types={"Path": Path}))
@@ -91,17 +110,23 @@ def run_pre_commit(sbt_project: Path) -> None:
 
 @then(parsers.cfparse("the code in {file_name:Path} should be formatted", extra_types={"Path": Path}))
 def assert_code_is_formatted(sbt_project: Path, file_name: Path) -> None:
-    actual_content = sbt_project.joinpath(file_name).open("r", encoding="UTF-8").read()
-    assert actual_content == _FORMATTED_CODE
+    actual_content = sbt_project.joinpath(file_name).read_text()
+    if str(file_name).endswith("scala"):
+        assert actual_content == _FORMATTED_SCALA_CODE
+    elif str(file_name).endswith("sbt"):
+        assert actual_content == _FORMATTED_SBT_CODE
 
 
 @then(parsers.cfparse("the code in the code in {file_name:Path} should not be formatted", extra_types={"Path": Path}))
 def assert_code_not_formatted(sbt_project: Path, file_name: Path) -> None:
-    actual_content = sbt_project.joinpath(file_name).open("r", encoding="UTF-8").read()
-    assert actual_content == _UNFORMATTED_CODE
+    actual_content = sbt_project.joinpath(file_name).read_text()
+    if str(file_name).endswith("scala"):
+        assert actual_content == _UNFORMATTED_SCALA_CODE
+    elif str(file_name).endswith("sbt"):
+        assert actual_content == _UNFORMATTED_SBT_CODE
 
 
 def _get_test_config() -> dict[str, str]:
-    file = Path("tests/behaviour/features/test_config.json").open("r", encoding="UTF-8")
-    config: dict[str, str] = json.load(file)
+    config_file = Path("tests/behaviour/features/test_config.json")
+    config: dict[str, str] = json.load(config_file.open("r", encoding="UTF-8"))
     return config
