@@ -2,6 +2,12 @@ import json
 
 
 def create_exec_request(command_id: int, sbt_command: str) -> str:
+    """
+    Create an exec request for SBT server
+    :param command_id: A unique ID for the task
+    :param sbt_command: The command to be run in SBT
+    :return: A request which (when sent to SBT server) will invoke the provided command
+    """
     rpc_body = _body(command_id, f"reload;{sbt_command}")
     bsp_header = _header(len(rpc_body) + 2)
     return bsp_header + "\r\n" + rpc_body + "\r\n"
