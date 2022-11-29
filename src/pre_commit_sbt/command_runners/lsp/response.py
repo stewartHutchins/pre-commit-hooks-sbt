@@ -64,6 +64,11 @@ def error_message(completion_msg: JsonType) -> str:
 
 
 def return_code(completion_msg: JsonType) -> int:
+    """
+    Get the return code from the final response message
+    :param completion_msg: The final response
+    :return: The return code
+    """
     if "result" in completion_msg:  # pylint: disable=no-else-return
         return completion_msg["result"]["exitCode"]  # type: ignore
     else:
