@@ -11,11 +11,6 @@ class _HeaderKeys:  # pylint: disable=too-few-public-methods
 
 
 async def get_next_message(reader: StreamReader) -> JsonType:
-    """
-    Read the next message sent by SBT server
-    :param reader: A stream reader connected to the socket
-    :return: The next message
-    """
     headers = _parse_headers(await _read_headers(reader))
     content_length: int = headers[_HeaderKeys.CONTENT_LENGTH]  # type: ignore
     body = _parse_body(await _read_body(content_length, reader))
