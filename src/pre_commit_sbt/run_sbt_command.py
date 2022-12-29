@@ -45,10 +45,10 @@ async def _run_sbt_command(command: str, cwd: Path) -> None:
     info(f'Running command: "{command}"')
     if is_server_running(cwd):
         with (open(port_path(cwd), encoding="UTF-8") as fp, connect_to_sbt_server(connection_details(fp)) as conn):
-            info("Running command via LSP...")
+            info("Running command via LSP")
             await run_via_lsp(command, conn)
     else:
-        info("Running command via commandline...")
+        info("Running command via commandline")
         warning("Running commands via the commandline can be slow. Start an SBT server to avoid unnecessary overhead.")
         await run_via_commandline(command, cwd)
     info("Successfully ran hook")
