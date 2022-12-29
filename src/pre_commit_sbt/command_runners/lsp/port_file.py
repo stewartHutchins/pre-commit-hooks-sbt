@@ -16,11 +16,6 @@ def port_path(root_dir: Path) -> Path:
 
 
 def connection_details(active_json_io: TextIO) -> Path:
-    """
-    Get the location of the unix socket, from the opened port file
-    :param active_json_io: An opened port file
-    :return: The path to the unix socket
-    """
     parsed_json: dict[str, str] = json.load(active_json_io)
     uri = parsed_json["uri"]
     return Path(urlparse(uri).path)
