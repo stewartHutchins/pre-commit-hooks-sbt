@@ -5,8 +5,8 @@ import pytest
 from testing_utils.sbt import add_touch_command_to_sbt
 
 from pre_commit_sbt.command_runners.lsp_runner import run_via_lsp
+from pre_commit_sbt.err.error_msgs import COMMAND_FAILED
 from pre_commit_sbt.err.exceptions import FailedCommandError
-from pre_commit_sbt.lsp.error_codes import error_code_to_human_readable
 
 
 @pytest.mark.asyncio
@@ -36,6 +36,4 @@ async def test_run_via_lsp_invalid_command(sbt_project_with_server_and_socket: t
         await run_via_lsp("non_existent_command", sbt_conn)
 
     # assert
-    actual_msg: str = ex.value.args[0]
-    assert "-33000" in actual_msg
-    assert error_code_to_human_readable(-33000) in actual_msg
+    assert ex.value.args[0] == COMMAND_FAILED
