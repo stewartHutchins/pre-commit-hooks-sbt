@@ -3,16 +3,14 @@ from asyncio import StreamReader
 
 import pytest
 
-from pre_commit_sbt.command_runners.lsp.response import error_message
-from pre_commit_sbt.command_runners.lsp.response import get_next_message
-from pre_commit_sbt.command_runners.lsp.response import is_completion_message
-from pre_commit_sbt.command_runners.lsp.response import JsonType
-from pre_commit_sbt.command_runners.lsp.response import return_code
+from pre_commit_sbt.command_runners.lsp.response import read_until_complete_message
+from pre_commit_sbt.err.error_msgs import COMMAND_FAILED
+from pre_commit_sbt.err.exceptions import FailedCommandError
 
 
 @pytest.mark.asyncio
-async def test_get_next_message() -> None:
-    """get_next_message should read the next message"""
+async def test_read_until_complete_message_to_complete() -> None:
+    """read_until_complete_message should wait for a completion message"""
     # arrange
     expected_task_id = 10
     expected_exit_code = 0
@@ -25,52 +23,32 @@ async def test_get_next_message() -> None:
     )
 
     # act
-    actual = await get_next_message(reader)
+    actual = await read_until_complete_message(reader, expected_task_id)
 
     # assert
     assert actual["id"] == expected_task_id
     assert actual["result"]["exitCode"] == expected_exit_code  # type: ignore
 
 
-@pytest.mark.parametrize(
-    ["task_id", "body", "expected"], [[10, {"id": 10}, True], [10, {"id": 9}, False], [10, {}, False]]
-)
-def test_is_response_message(task_id: int, body: JsonType, expected: bool) -> None:
-    # act
-    actual = is_completion_message(body, task_id)
-
-    # assert
-    assert actual == expected
-
-
-def test_error_message() -> None:
+@pytest.mark.asyncio
+async def test_read_until_complete_message_no_completion_msg() -> None:
+    """wait_for_task_to_complete should raise an exception if no message is returned"""
     # arrange
-    expected = "some text"
-    body: JsonType = {"error": {"message": expected}}
+    empty_reader = _create_reader_with_eof()
 
-    # act
-    actual = error_message(body)
-
-    # assert
-    assert actual == expected
-
-
-@pytest.mark.parametrize(
-    ["body", "expected"],
-    [
-        [{"result": {"exitCode": 10}}, 10],
-        [{"error": {"code": 11}}, 11],
-    ],
-)
-def test_return_code(body: JsonType, expected: int) -> None:
-    # act
-    actual = return_code(body)
-
-    # assert
-    assert actual == expected
+    # act & assert
+    with pytest.raises(FailedCommandError) as ex:
+        await read_until_complete_message(empty_reader, 10)
+    assert ex.value.args[0] == COMMAND_FAILED
 
 
 def _create_reader_with_msg(msg: str) -> StreamReader:
     reader = StreamReader()
     reader.feed_data(msg.encode("UTF-8"))
+    return reader
+
+
+def _create_reader_with_eof() -> StreamReader:
+    reader = StreamReader()
+    reader.feed_eof()
     return reader
