@@ -56,14 +56,6 @@ def _parse_body(content: str) -> JsonType:
 
 
 def is_completion_message(message: JsonType, task_id: int) -> bool:
-    """
-    Determine whether the message sent indicates whether the SBT command has
-    completed
-    :param message: A message from sbt server
-    :param task_id: The task ID of the message
-    :return: True if the message sent indicates completion of the command,
-    else False
-    """
     return message.get("id") == task_id
 
 
