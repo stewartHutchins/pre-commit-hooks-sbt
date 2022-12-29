@@ -1,2 +1,0 @@
-class FailedCommandError(ValueError):
-    pass
