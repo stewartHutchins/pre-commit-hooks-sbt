@@ -5,8 +5,8 @@ from socket import SocketType
 import pytest
 from testing_utils.sbt import add_touch_command_to_sbt
 
+from pre_commit_sbt.command_runners.lsp.receive import read_until_complete_message
 from pre_commit_sbt.command_runners.lsp.request import create_exec_request
-from pre_commit_sbt.command_runners.lsp.response import read_until_complete_message
 
 
 @pytest.mark.asyncio
