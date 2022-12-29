@@ -1,7 +1,6 @@
 import random
 from asyncio import open_unix_connection
 from asyncio import StreamReader
-from logging import debug
 from socket import SocketType
 from typing import AsyncIterable
 
@@ -39,7 +38,6 @@ async def run_via_lsp(sbt_command: str, socket: SocketType) -> None:
 
 async def _read_until_complete_message(reader: StreamReader, task_id: int) -> JsonType:
     async for message in _message_iterator(reader):
-        debug(message)
         if is_completion_message(message, task_id):
             return message
     raise FailedCommandError(COMMAND_FAILED)
