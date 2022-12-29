@@ -22,12 +22,6 @@ _MAX_ID = 10**6
 
 
 async def run_via_lsp(sbt_command: str, socket: SocketType) -> None:
-    """
-    Run a command via LSP
-    :param sbt_command: The command to run
-    :param socket: A connection to sbt server
-    :return: None
-    """
     reader, writer = await open_unix_connection(sock=socket)
     task_id = random.randint(_MIN_ID, _MAX_ID)
     json_rpc = create_exec_request(task_id, sbt_command)
