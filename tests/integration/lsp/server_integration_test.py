@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pre_commit_sbt.command_runners.lsp.server import is_server_running
+from pre_commit_sbt.lsp.server import is_server_running
 
 
 def test_is_running_server_server_is_running(sbt_project_with_server: Path) -> None:

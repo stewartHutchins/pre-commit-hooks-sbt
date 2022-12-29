@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from pre_commit_sbt.command_runners.lsp.port_file import connection_details
-from pre_commit_sbt.command_runners.lsp.port_file import port_path
+from pre_commit_sbt.lsp.port_file import connection_details
+from pre_commit_sbt.lsp.port_file import port_path
 
 
 def test_active_json_is_file(sbt_project_with_server: Path) -> None:

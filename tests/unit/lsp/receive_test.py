@@ -3,9 +3,9 @@ from asyncio import StreamReader
 
 import pytest
 
-from pre_commit_sbt.command_runners.lsp.receive import read_until_complete_message
 from pre_commit_sbt.err.error_msgs import COMMAND_FAILED
 from pre_commit_sbt.err.exceptions import FailedCommandError
+from pre_commit_sbt.lsp.receive import read_until_complete_message
 
 
 @pytest.mark.asyncio

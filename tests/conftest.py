@@ -8,10 +8,10 @@ from typing import AsyncGenerator
 import pytest_asyncio
 from _pytest.fixtures import SubRequest
 
-from pre_commit_sbt.command_runners.lsp.conn import connect_to_sbt_server
-from pre_commit_sbt.command_runners.lsp.port_file import connection_details
-from pre_commit_sbt.command_runners.lsp.port_file import port_path
-from pre_commit_sbt.command_runners.lsp.server import is_server_running
+from pre_commit_sbt.lsp.conn import connect_to_sbt_server
+from pre_commit_sbt.lsp.port_file import connection_details
+from pre_commit_sbt.lsp.port_file import port_path
+from pre_commit_sbt.lsp.server import is_server_running
 
 _PROJECT_NAME = "Test-SBT-Project".lower()
 _TIMEOUT = 30

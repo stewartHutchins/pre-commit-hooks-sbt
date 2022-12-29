@@ -1,6 +1,6 @@
 from io import StringIO
 
-from pre_commit_sbt.command_runners.lsp.port_file import connection_details
+from pre_commit_sbt.lsp.port_file import connection_details
 
 
 def test_connection_details() -> None:

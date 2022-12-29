@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from pre_commit_sbt.command_runners.lsp.port_file import port_path
-from pre_commit_sbt.command_runners.lsp.server import is_server_running
+from pre_commit_sbt.lsp.port_file import port_path
+from pre_commit_sbt.lsp.server import is_server_running
 
 
 def test_is_server_running_when_file_is_present(tmp_path: Path) -> None:

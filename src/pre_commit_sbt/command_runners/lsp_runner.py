@@ -3,11 +3,11 @@ from asyncio import open_unix_connection
 from asyncio import StreamWriter
 from socket import SocketType
 
-from pre_commit_sbt.command_runners.lsp.error_codes import error_code_to_human_readable
-from pre_commit_sbt.command_runners.lsp.receive import read_until_complete_message
-from pre_commit_sbt.command_runners.lsp.rpc import command_rpc
 from pre_commit_sbt.err.error_msgs import LSP_FAILURE_MSG
 from pre_commit_sbt.err.exceptions import LspRunnerError
+from pre_commit_sbt.lsp.error_codes import error_code_to_human_readable
+from pre_commit_sbt.lsp.receive import read_until_complete_message
+from pre_commit_sbt.lsp.rpc import command_rpc
 
 _MIN_ID = 1
 _MAX_ID = 10**6
