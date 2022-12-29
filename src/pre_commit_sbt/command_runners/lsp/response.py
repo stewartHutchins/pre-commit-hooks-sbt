@@ -60,11 +60,6 @@ def is_completion_message(message: JsonType, task_id: int) -> bool:
 
 
 def error_message(completion_msg: JsonType) -> str:
-    """
-    Get the error message from the final response message
-    :param completion_msg: The final response
-    :return: The error message
-    """
     return completion_msg["error"]["message"]  # type: ignore
 
 
