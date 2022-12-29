@@ -5,7 +5,7 @@ from socket import SocketType
 
 from pre_commit_sbt.command_runners.lsp.error_codes import error_code_to_human_readable
 from pre_commit_sbt.command_runners.lsp.receive import read_until_complete_message
-from pre_commit_sbt.command_runners.lsp.request import create_exec_request
+from pre_commit_sbt.command_runners.lsp.rpc import command_rpc
 from pre_commit_sbt.err.error_msgs import LSP_FAILURE_MSG
 from pre_commit_sbt.err.exceptions import LspRunnerError
 
@@ -16,7 +16,7 @@ _MAX_ID = 10**6
 async def run_via_lsp(sbt_command: str, socket: SocketType) -> None:
     reader, writer = await open_unix_connection(sock=socket)
     task_id = random.randint(_MIN_ID, _MAX_ID)
-    json_rpc = create_exec_request(task_id, sbt_command)
+    json_rpc = command_rpc(task_id, sbt_command)
     _send_to_server(writer, json_rpc)
     completion_msg = await read_until_complete_message(reader, task_id)
     err_code: int = _err_code(completion_msg)  # type: ignore

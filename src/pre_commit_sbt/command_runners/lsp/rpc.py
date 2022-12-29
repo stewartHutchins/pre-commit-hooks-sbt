@@ -1,7 +1,7 @@
 import json
 
 
-def create_exec_request(command_id: int, sbt_command: str) -> str:
+def command_rpc(command_id: int, sbt_command: str) -> str:
     rpc_body = _body(command_id, f"reload;{sbt_command}")
     bsp_header = _header(len(rpc_body) + 2)
     return bsp_header + "\r\n" + rpc_body + "\r\n"
