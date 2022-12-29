@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import AsyncIterable
 
 from pre_commit_sbt.err.error_msgs import COMMAND_FAILED
-from pre_commit_sbt.err.exceptions import FailedCommandError
+from pre_commit_sbt.err.failed_command_error import FailedCommandError
 
 
 async def run_via_commandline(command: str, cwd: Path) -> None:
