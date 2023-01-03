@@ -8,7 +8,7 @@ from typing import Callable
 from typing import Iterator
 
 import pytest
-from pytest_asyncio.plugin import SubRequest
+from _pytest.fixtures import FixtureRequest
 
 from pre_commit_sbt.port_file import is_server_runner
 
@@ -16,7 +16,7 @@ _TIMEOUT = 30
 
 
 @pytest.fixture(params=[False, True])
-def sbt_project(tmp_path: Path, request: SubRequest) -> Iterator[Path]:
+def sbt_project(tmp_path: Path, request: FixtureRequest) -> Iterator[Path]:
     if request.param:  # start SBT server
         with _sbt_server(tmp_path):
             yield tmp_path
