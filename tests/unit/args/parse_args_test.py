@@ -25,7 +25,7 @@ def test_sbt_command() -> None:
 
 
 def test_missing_sbt_command() -> None:
-    """parser should raise an exeption if the --command argument is missing"""
+    """parser should raise an exception if the --command argument is missing"""
     # arrange
     args: list[str] = []
 
