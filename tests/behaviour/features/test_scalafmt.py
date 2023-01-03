@@ -1,4 +1,4 @@
-import json
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -41,50 +41,45 @@ lazy val root = (project in file("."))
 
 
 @scenario("scalafmt.feature", "scala code is formatted")
-def test_scalafmt_scala_code(sbt_project: Path) -> None:  # pylint: disable=unused-argument
+def test_scalafmt_scala_code(tmp_path: Path) -> None:  # pylint: disable=unused-argument
     pass
 
 
 @scenario("scalafmt.feature", "sbt code is formatted")
-def test_scalafmt_sbt_code(sbt_project: Path) -> None:  # pylint: disable=unused-argument
+def test_scalafmt_sbt_code(tmp_path: Path) -> None:  # pylint: disable=unused-argument
     pass
 
 
 @scenario("scalafmt.feature", "only staged code is formatted")
-def test_scalafmt_working_tree(sbt_project: Path) -> None:  # pylint: disable=unused-argument
+def test_scalafmt_working_tree(tmp_path: Path) -> None:  # pylint: disable=unused-argument
     pass
 
 
-@given("an sbt project with scalafmt configured")
-def create_sbt_project(sbt_project: Path) -> None:
-    plugins_file = sbt_project.joinpath("project/plugins.sbt")
-    plugins_file.parent.mkdir(parents=True, exist_ok=True)
-    plugins_file.write_text(
-        f'addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "{_get_test_config()["scalafmt.plugun.version"]}")'
+@given("a sbt project with scalafmt")
+def create_sbt_project_with_scalafmt(tmp_path: Path) -> None:
+    project_root = tmp_path
+    shutil.copytree(
+        "testing/project_with_scalafmt_command",
+        project_root,
+        dirs_exist_ok=True,
     )
-    scalafmt_conf = sbt_project.joinpath(".scalafmt.conf")
-    scalafmt_conf.write_text(
-        f"""
-runner.dialect = {_get_test_config()["runner.dialect"]}
-version = {_get_test_config()["scalafmt.version"]}
-"""
-    )
-    git_init(sbt_project)
-    git_add(sbt_project, plugins_file)
-    git_add(sbt_project, scalafmt_conf)
-    git_commit(sbt_project, "Add sbt project with scalafmt set up.")
+    git_init(project_root)
+    git_add(project_root, ".")
+    git_commit(project_root, "Add sbt project with scalafmt set up.")
 
 
 @given(parsers.cfparse("there is unformatted code in {file_name:Path}", extra_types={"Path": Path}))
-def create_unformatted_file(sbt_project: Path, file_name: Path) -> None:
-    file = sbt_project.joinpath(file_name)
+def create_unformatted_file(tmp_path: Path, file_name: Path) -> None:
+    project_root = tmp_path
+    file = project_root.joinpath(file_name)
     file.parent.mkdir(parents=True, exist_ok=True)
-    if str(file_name).endswith("scala"):
+    file_type = file_name.suffix
+    if file_type == ".scala":
         file.write_text(_UNFORMATTED_SCALA_CODE)
-    elif str(file_name).endswith("sbt"):
+    elif file_type == ".sbt":
         file.write_text(_UNFORMATTED_SBT_CODE)
     else:
-        raise ValueError("Was not scala or sbt files.")
+        raise ValueError(f"Extension {file_type} not supported.")
 
 
 @given(parsers.cfparse("I git add {file_name:Path}", extra_types={"Path": Path}))
@@ -93,7 +88,7 @@ def git_add_file(sbt_project: Path, file_name: Path) -> None:
 
 
 @given(parsers.cfparse("the file {file_name:Path} is in the commit history", extra_types={"Path": Path}))
-def commit_to_history(sbt_project: Path, file_name: Path) -> None:
+def commit_no_verify(sbt_project: Path, file_name: Path) -> None:
     git_add(sbt_project, file_name)
     git_commit(sbt_project, f"Add {file_name}", "--no-verify")
 
@@ -111,9 +106,9 @@ def run_pre_commit(sbt_project: Path) -> None:
 @then(parsers.cfparse("the code in {file_name:Path} should be formatted", extra_types={"Path": Path}))
 def assert_code_is_formatted(sbt_project: Path, file_name: Path) -> None:
     actual_content = sbt_project.joinpath(file_name).read_text()
-    if str(file_name).endswith("scala"):
+    if file_name.suffix == ".scala":
         assert actual_content == _FORMATTED_SCALA_CODE
-    elif str(file_name).endswith("sbt"):
+    elif file_name.suffix == ".sbt":
         assert actual_content == _FORMATTED_SBT_CODE
 
 
@@ -124,9 +119,3 @@ def assert_code_not_formatted(sbt_project: Path, file_name: Path) -> None:
         assert actual_content == _UNFORMATTED_SCALA_CODE
     elif str(file_name).endswith("sbt"):
         assert actual_content == _UNFORMATTED_SBT_CODE
-
-
-def _get_test_config() -> dict[str, str]:
-    config_file = Path("tests/behaviour/features/test_config.json")
-    config: dict[str, str] = json.load(config_file.open("r", encoding="UTF-8"))
-    return config

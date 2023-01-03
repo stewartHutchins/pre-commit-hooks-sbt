@@ -6,7 +6,7 @@ def git_init(repo: Path) -> None:
     subprocess.run("git init", cwd=repo, check=True, shell=True, capture_output=True)
 
 
-def git_add(repo: Path, file: Path) -> None:
+def git_add(repo: Path, file: Path | str) -> None:
     subprocess.run(f"git add {file}", cwd=repo, check=True, shell=True)
 
 

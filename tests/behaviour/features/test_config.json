@@ -1,5 +1,0 @@
-{
-  "scalafmt.plugun.version": "2.4.6",
-  "runner.dialect": "scala3",
-  "scalafmt.version": "3.5.9"
-}

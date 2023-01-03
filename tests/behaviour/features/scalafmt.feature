@@ -2,7 +2,7 @@ Feature: scalafmt
   Code should be formatted by scalafmt
 
   Background:
-    Given an sbt project with scalafmt configured
+    Given a sbt project with scalafmt
 
   Scenario: scala code is formatted
     Given there is unformatted code in src/main/scala/Main.scala
