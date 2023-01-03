@@ -1,62 +1,51 @@
-import asyncio
 import contextlib
 import subprocess
-from asyncio.subprocess import Process
+import time
 from pathlib import Path
-from typing import AsyncIterator
+from subprocess import Popen
+from subprocess import SubprocessError
+from typing import Callable
+from typing import Iterator
 
-import pytest_asyncio
+import pytest
 
-_PROJECT_NAME = "Test-SBT-Project".lower()
+from pre_commit_sbt.port_file import is_server_runner
 
-
-@pytest_asyncio.fixture
-async def sbt_project(tmp_path: Path) -> Path:
-    server = await _start_server(tmp_path)
-    await _shutdown_server(server)
-    return tmp_path
+_TIMEOUT = 30
 
 
-@pytest_asyncio.fixture
-async def sbt_project_with_server(tmp_path: Path) -> AsyncIterator[Path]:
-    root_dir = tmp_path.joinpath(_PROJECT_NAME)
-    root_dir.mkdir()
-    async with _sbt_server(root_dir):
-        yield root_dir
+@pytest.fixture
+def sbt_project_with_server(tmp_path: Path) -> Iterator[Path]:
+    with _sbt_server(tmp_path):
+        yield tmp_path
 
 
-@contextlib.asynccontextmanager
-async def _sbt_server(root_dir: Path) -> AsyncIterator[Process]:
-    proc: Process | None = None
+@contextlib.contextmanager
+def _sbt_server(root_dir: Path) -> Iterator[Popen[bytes]]:
+    proc: Popen[bytes] | None = None
     try:
-        proc = await _start_server(root_dir)
+        proc = _start_server(root_dir)
+        _wait_for(lambda: is_server_runner(root_dir))
         yield proc
     finally:
         if proc is not None:
-            await _shutdown_server(proc)
+            _shutdown_server(proc)
 
 
-async def _start_server(root_dir: Path) -> Process:
-    return await asyncio.create_subprocess_shell(
-        "sbt", cwd=root_dir, stdin=subprocess.PIPE, stdout=subprocess.PIPE, shell=True
-    )
+def _start_server(root_dir: Path) -> Popen[bytes]:
+    return Popen("sbt", cwd=root_dir, stdin=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
 
 
-async def _shutdown_server(proc: Process) -> None:
+def _wait_for(pred: Callable[[], bool], timeout: int = _TIMEOUT) -> None:
+    end = time.time() + timeout
+    while not pred():
+        if time.time() <= end:
+            time.sleep(1)
+
+
+def _shutdown_server(proc: Popen[bytes]) -> None:
     try:
-        assert proc.stdin is not None
-        proc.stdin.write(b"shutdown\n")
-        await _wait_for_exit(proc)
-    except asyncio.TimeoutError:
+        proc.communicate(b"shutdown\n")
+        proc.wait(timeout=_TIMEOUT)
+    except SubprocessError:
         proc.kill()
-
-
-async def _wait_for_exit(proc: Process, *, timeout: int = 10) -> None:
-    await asyncio.wait_for(_get_return_code(proc), timeout)
-
-
-async def _get_return_code(proc: Process) -> int:
-    while True:
-        if proc.returncode == 0:
-            return proc.returncode
-        await asyncio.sleep(1)

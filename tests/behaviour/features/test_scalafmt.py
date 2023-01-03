@@ -83,29 +83,29 @@ def create_unformatted_file(tmp_path: Path, file_name: Path) -> None:
 
 
 @given(parsers.cfparse("I git add {file_name:Path}", extra_types={"Path": Path}))
-def git_add_file(sbt_project: Path, file_name: Path) -> None:
-    git_add(sbt_project, file_name)
+def git_add_file(tmp_path: Path, file_name: Path) -> None:
+    git_add(tmp_path, file_name)
 
 
 @given(parsers.cfparse("the file {file_name:Path} is in the commit history", extra_types={"Path": Path}))
-def commit_no_verify(sbt_project: Path, file_name: Path) -> None:
-    git_add(sbt_project, file_name)
-    git_commit(sbt_project, f"Add {file_name}", "--no-verify")
+def commit_no_verify(tmp_path: Path, file_name: Path) -> None:
+    git_add(tmp_path, file_name)
+    git_commit(tmp_path, f"Add {file_name}", "--no-verify")
 
 
 @when("I run pre-commit")
-def run_pre_commit(sbt_project: Path) -> None:
+def run_pre_commit(tmp_path: Path) -> None:
     subprocess.run(
         f"pre-commit try-repo {Path('.').absolute()} scalafmt --verbose",
-        cwd=sbt_project,
+        cwd=tmp_path,
         check=False,
         shell=True,
     )
 
 
 @then(parsers.cfparse("the code in {file_name:Path} should be formatted", extra_types={"Path": Path}))
-def assert_code_is_formatted(sbt_project: Path, file_name: Path) -> None:
-    actual_content = sbt_project.joinpath(file_name).read_text()
+def assert_code_is_formatted(tmp_path: Path, file_name: Path) -> None:
+    actual_content = tmp_path.joinpath(file_name).read_text()
     if file_name.suffix == ".scala":
         assert actual_content == _FORMATTED_SCALA_CODE
     elif file_name.suffix == ".sbt":
@@ -113,8 +113,8 @@ def assert_code_is_formatted(sbt_project: Path, file_name: Path) -> None:
 
 
 @then(parsers.cfparse("the code in the code in {file_name:Path} should not be formatted", extra_types={"Path": Path}))
-def assert_code_not_formatted(sbt_project: Path, file_name: Path) -> None:
-    actual_content = sbt_project.joinpath(file_name).read_text()
+def assert_code_not_formatted(tmp_path: Path, file_name: Path) -> None:
+    actual_content = tmp_path.joinpath(file_name).read_text()
     if str(file_name).endswith("scala"):
         assert actual_content == _UNFORMATTED_SCALA_CODE
     elif str(file_name).endswith("sbt"):
